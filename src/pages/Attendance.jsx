@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { ref, uploadString, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../firebase";
+import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import StatusStamp from "../components/StatusStamp";
+
+// NOTE: Photo storage is temporarily disabled because Firebase Storage
+// requires the Blaze (pay-as-you-go) plan. The camera step still runs as a
+// presence check, but the captured image is not uploaded anywhere — only
+// timestamp + location are saved. To re-enable photo storage:
+// 1. Upgrade your Firebase project to the Blaze plan
+// 2. In Firebase console: Storage -> Get started -> Done
+// 3. Restore the storage import/upload block (see project history)
 
 // If your school has fixed coordinates, set them here to flag check-ins
 // that happen far from campus (a simple geofence).
@@ -29,10 +36,10 @@ export default function Attendance() {
   const streamRef = useRef(null);
 
   const [cameraReady, setCameraReady] = useState(false);
-  const [photo, setPhoto] = useState(null); // data URL
-  const [location, setLocation] = useState(null); // { lat, lng, accuracy }
-  const [locStatus, setLocStatus] = useState("idle"); // idle | loading | ok | error
-  const [saveStatus, setSaveStatus] = useState("idle"); // idle | saving | done | error
+  const [photo, setPhoto] = useState(null);
+  const [location, setLocation] = useState(null);
+  const [locStatus, setLocStatus] = useState("idle");
+  const [saveStatus, setSaveStatus] = useState("idle");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -109,18 +116,11 @@ export default function Attendance() {
     setSaveStatus("saving");
     setError("");
     try {
-      // Upload photo to Storage
-      const path = `attendance/${user.uid}/${Date.now()}.jpg`;
-      const storageRef = ref(storage, path);
-      await uploadString(storageRef, photo, "data_url");
-      const photoURL = await getDownloadURL(storageRef);
-
-      // Write attendance record to Firestore
       await addDoc(collection(db, "attendance"), {
         userId: user.uid,
         name: profile?.name || user.email,
         role: profile?.role || "unknown",
-        photoURL,
+        photoConfirmed: true,
         lat: location.lat,
         lng: location.lng,
         accuracy: location.accuracy,
@@ -154,7 +154,6 @@ export default function Attendance() {
         </p>
       )}
 
-      {/* Camera / photo preview */}
       <div className="badge-card ml-2 p-4 mb-4">
         <div className="relative bg-ledger-navy rounded-lg overflow-hidden aspect-[4/3]">
           {!photo && (
@@ -190,7 +189,6 @@ export default function Attendance() {
         </div>
       </div>
 
-      {/* Location */}
       <div className="badge-card ml-2 p-5 mb-6">
         <div className="flex items-center justify-between">
           <div>
