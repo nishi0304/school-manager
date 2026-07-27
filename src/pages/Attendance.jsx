@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { ref, uploadString, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../firebase";
+import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import StatusStamp from "../components/StatusStamp";
+
+// NOTE: Photo storage is temporarily disabled because Firebase Storage
+// requires the Blaze (pay-as-you-go) plan. The camera step still runs as a
+// presence check, but the captured image is not uploaded anywhere — only
+// timestamp + location are saved. To re-enable photo storage:
+// 1. Upgrade your Firebase project to the Blaze plan
+// 2. In Firebase console: Storage -> Get started -> Done
+// 3. Restore the storage import/upload block (see project history)
 
 // If your school has fixed coordinates, set them here to flag check-ins
 // that happen far from campus (a simple geofence).
@@ -109,18 +116,15 @@ export default function Attendance() {
     setSaveStatus("saving");
     setError("");
     try {
-      // Upload photo to Storage
-      const path = `attendance/${user.uid}/${Date.now()}.jpg`;
-      const storageRef = ref(storage, path);
-      await uploadString(storageRef, photo, "data_url");
-      const photoURL = await getDownloadURL(storageRef);
+      // Photo upload is skipped for now (needs Firebase Blaze plan).
+      // The photo is only used locally as a presence check and isn't saved.
 
       // Write attendance record to Firestore
       await addDoc(collection(db, "attendance"), {
         userId: user.uid,
         name: profile?.name || user.email,
         role: profile?.role || "unknown",
-        photoURL,
+        photoConfirmed: true,
         lat: location.lat,
         lng: location.lng,
         accuracy: location.accuracy,
