@@ -1,15 +1,65 @@
+import { useEffect, useState } from "react";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import StatusStamp from "../components/StatusStamp";
 
-const CARDS = [
-  { label: "Students present today", value: "—", note: "Wire to attendance collection" },
-  { label: "Fees collected this month", value: "—", note: "Wire to fees collection" },
-  { label: "Salaries pending", value: "—", note: "Wire to salary collection" },
-  { label: "Classes today", value: "—", note: "Wire to timetable collection" },
-];
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function isToday(timestamp) {
+  if (!timestamp?.toDate) return false;
+  const d = timestamp.toDate();
+  const now = new Date();
+  return (
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
+  );
+}
 
 export default function Dashboard() {
   const { profile } = useAuth();
+
+  const [attendance, setAttendance] = useState([]);
+  const [fees, setFees] = useState([]);
+  const [salaries, setSalaries] = useState([]);
+  const [timetable, setTimetable] = useState([]);
+
+  useEffect(() => {
+    const unsubs = [
+      onSnapshot(collection(db, "attendance"), (snap) =>
+        setAttendance(snap.docs.map((d) => d.data()))
+      ),
+      onSnapshot(collection(db, "fees"), (snap) =>
+        setFees(snap.docs.map((d) => d.data()))
+      ),
+      onSnapshot(collection(db, "salaries"), (snap) =>
+        setSalaries(snap.docs.map((d) => d.data()))
+      ),
+      onSnapshot(collection(db, "timetable"), (snap) =>
+        setTimetable(snap.docs.map((d) => d.data()))
+      ),
+    ];
+    return () => unsubs.forEach((u) => u());
+  }, []);
+
+  const presentToday = attendance.filter(
+    (a) => a.role === "student" && isToday(a.timestamp)
+  ).length;
+
+  const feesCollected = fees.reduce((sum, f) => sum + (Number(f.amountPaid) || 0), 0);
+
+  const salariesPending = salaries.filter((s) => !s.paid).length;
+
+  const todayName = DAY_NAMES[new Date().getDay()];
+  const classesToday = timetable.filter((t) => t.day === todayName).length;
+
+  const CARDS = [
+    { label: "Students present today", value: presentToday },
+    { label: "Fees collected (all time)", value: `₹${feesCollected.toLocaleString("en-IN")}` },
+    { label: "Salaries pending", value: salariesPending },
+    { label: "Classes today", value: classesToday },
+  ];
 
   return (
     <div>
@@ -35,21 +85,18 @@ export default function Dashboard() {
           <div key={c.label} className="badge-card p-5 ml-2">
             <p className="text-3xl font-display font-semibold text-ledger-navy">{c.value}</p>
             <p className="text-sm text-ledger-navy/70 mt-1">{c.label}</p>
-            <p className="text-xs text-ledger-navy/30 mt-2 font-mono">{c.note}</p>
           </div>
         ))}
       </div>
 
       <div className="badge-card p-6 ml-2">
         <h2 className="font-display text-lg font-semibold text-ledger-navy mb-2">
-          Next steps
+          Quick actions
         </h2>
-        <ul className="text-sm text-ledger-navy/70 space-y-1.5 list-disc list-inside">
-          <li>Add your Firebase project keys in <code className="font-mono">src/firebase.js</code></li>
-          <li>Create a <code className="font-mono">users</code> collection with role: admin / teacher / student</li>
-          <li>Try the Attendance page — it requests camera + location permission</li>
-          <li>Flesh out Fees, Salary and Timetable with real Firestore reads once your data model is ready</li>
-        </ul>
+        <p className="text-sm text-ledger-navy/70">
+          Use the sidebar to check in attendance, add fee records, manage salaries, or edit the
+          timetable. Everything here updates live as records are added.
+        </p>
       </div>
     </div>
   );
