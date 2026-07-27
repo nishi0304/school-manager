@@ -8,14 +8,14 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
-};
-
+     apiKey: "AIzaSyDep4hEiaDKl2eu20SCwt43Zt06HpmxLoE",
+     authDomain: "school-manager-c02c4.firebaseapp.com",
+     projectId: "school-manager-c02c4",
+     storageBucket: "school-manager-c02c4.firebasestorage.app",
+     messagingSenderId: "565249198743",
+     appId: "1:565249198743:web:ed87f0f799f7499875b7d2",
+     measurementId: "G-XST5CRL7G8"
+   };
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
