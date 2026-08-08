@@ -82,14 +82,14 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         {CARDS.map((c) => (
-          <div key={c.label} className="badge-card p-5">
+          <div key={c.label} className="badge-card p-5 ml-2">
             <p className="text-3xl font-display font-semibold text-gy-ink">{c.value}</p>
             <p className="text-sm text-gy-ink/70 mt-1">{c.label}</p>
           </div>
         ))}
       </div>
 
-      <div className="badge-card p-6">
+      <div className="badge-card p-6 ml-2">
         <h2 className="font-display text-lg font-semibold text-gy-ink mb-2">
           Quick actions
         </h2>
