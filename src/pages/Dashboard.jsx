@@ -65,7 +65,7 @@ export default function Dashboard() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <p className="text-xs font-mono uppercase text-ledger-navy/50">
+          <p className="text-xs font-mono uppercase text-gy-ink/50">
             {new Date().toLocaleDateString(undefined, {
               weekday: "long",
               year: "numeric",
@@ -73,7 +73,7 @@ export default function Dashboard() {
               day: "numeric",
             })}
           </p>
-          <h1 className="font-display text-3xl font-semibold text-ledger-navy mt-1">
+          <h1 className="font-display text-3xl font-semibold text-gy-ink mt-1">
             Welcome{profile?.name ? `, ${profile.name}` : ""}
           </h1>
         </div>
@@ -82,18 +82,18 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         {CARDS.map((c) => (
-          <div key={c.label} className="badge-card p-5 ml-2">
-            <p className="text-3xl font-display font-semibold text-ledger-navy">{c.value}</p>
-            <p className="text-sm text-ledger-navy/70 mt-1">{c.label}</p>
+          <div key={c.label} className="badge-card p-5">
+            <p className="text-3xl font-display font-semibold text-gy-ink">{c.value}</p>
+            <p className="text-sm text-gy-ink/70 mt-1">{c.label}</p>
           </div>
         ))}
       </div>
 
-      <div className="badge-card p-6 ml-2">
-        <h2 className="font-display text-lg font-semibold text-ledger-navy mb-2">
+      <div className="badge-card p-6">
+        <h2 className="font-display text-lg font-semibold text-gy-ink mb-2">
           Quick actions
         </h2>
-        <p className="text-sm text-ledger-navy/70">
+        <p className="text-sm text-gy-ink/70">
           Use the sidebar to check in attendance, add fee records, manage salaries, or edit the
           timetable. Everything here updates live as records are added.
         </p>
